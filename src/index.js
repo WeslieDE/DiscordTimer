@@ -10,7 +10,8 @@ import {
 import Database from 'better-sqlite3';
 
 // === SQLite Setup ===
-const db = new Database('timers.db');
+const dbPath = process.env.TIMER_DB_PATH || 'timers.db';
+const db = new Database(dbPath);
 db.exec(`
 CREATE TABLE IF NOT EXISTS timers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
