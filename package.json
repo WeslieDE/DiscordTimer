@@ -1,18 +1,26 @@
 {
-  "name": "discord-timer-bot",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "src/index.js",
-  "scripts": {
-    "register": "node src/register-commands.js",
-    "start": "node src/index.js"
-  },
   "dependencies": {
-    "better-sqlite3": "^9.0.0",
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
+    "better-sqlite3": "^12.2.0",
+    "discord.js": "^14.21.0",
+    "dotenv": "^17.2.1"
   },
-  "engines": {
-    "node": ">=18"
-  }
+  "name": "discordtimer",
+  "version": "1.0.0",
+  "description": "A simple discord bot that provide a timer comand what send you a dm after the timer ist over.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeslieDE/DiscordTimer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WeslieDE/DiscordTimer/issues"
+  },
+  "homepage": "https://github.com/WeslieDE/DiscordTimer#readme"
 }
