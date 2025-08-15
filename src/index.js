@@ -25,13 +25,20 @@ CREATE TABLE IF NOT EXISTS timers (
 CREATE INDEX IF NOT EXISTS idx_timers_due ON timers (end_at, notified);
 `);
 
+// Migration: channel_id hinzufügen (falls noch nicht vorhanden)
+try {
+  db.exec(`ALTER TABLE timers ADD COLUMN channel_id TEXT;`);
+} catch (e) {
+  // Ignorieren, wenn Spalte bereits existiert
+}
+
 const insertTimer = db.prepare(`
-  INSERT INTO timers (user_id, comment, end_at, created_at, notified)
-  VALUES (@user_id, @comment, @end_at, @created_at, 0)
+  INSERT INTO timers (user_id, channel_id, comment, end_at, created_at, notified)
+  VALUES (@user_id, @channel_id, @comment, @end_at, @created_at, 0)
 `);
 
 const fetchDue = db.prepare(`
-  SELECT id, user_id, comment, end_at FROM timers
+  SELECT id, user_id, channel_id, comment, end_at FROM timers
   WHERE notified = 0 AND end_at <= @now
   ORDER BY end_at ASC
   LIMIT 100
@@ -151,8 +158,12 @@ async function processDueTimers() {
       const rel = `<t:${row.end_at}:R>`;         // relativ
       const note = row.comment ? `\n📝 ${row.comment}` : '';
 
+      const channelInfo = row.channel_id
+        ? `\n📍 Ausgeführt in <#${row.channel_id}>`
+        : '';
+
       await user.send({
-        content: `⏰ **Timer abgelaufen!**\nFällig: ${when} (${rel})${note}`
+        content: `⏰ **Timer abgelaufen!**\nFällig: ${when} (${rel})${note}${channelInfo}`
       });
 
       markNotified.run({ id: row.id });
@@ -173,7 +184,7 @@ client.once(Events.ClientReady, async () => {
   // Beim Start sofort "überfällige" Timer abarbeiten
   await processDueTimers();
 
-  // Danach regelmäßig prüfen (alle 30s)
+  // Danach regelmäßig prüfen (alle 10s)
   setInterval(processDueTimers, 10_000);
 });
 
@@ -205,6 +216,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   insertTimer.run({
     user_id: interaction.user.id,
+    channel_id: interaction.channelId, // <- neu: Channel speichern
     comment,
     end_at: endAtSec,
     created_at: nowSec
